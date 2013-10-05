@@ -9,12 +9,9 @@ import akka.util.Timeout
 import scala.concurrent.duration._
 import scala.concurrent.Await
 import com.bfil.board.messages.Grabbed
-import akka.event.Logging
+import akka.actor.ActorLogging
 
-class User extends Actor {
-  
-  val log = Logging(context.system, this)
-  
+class User extends Actor with ActorLogging {
   var grabbedItem: Option[ActorRef] = None
   
   def receive = {
