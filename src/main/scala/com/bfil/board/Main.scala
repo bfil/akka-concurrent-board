@@ -20,6 +20,7 @@ object Main extends App {
     () => user2 ! Grab(stickyNote),
     () => user ! Drop,
     () => user2 ! Grab(stickyNote),
+    () => user ! Drop,
     () => user ! Grab(stickyNote2))
 
   def sequence(delay: Double, tasks: (() => Unit)*) = {

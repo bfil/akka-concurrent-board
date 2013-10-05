@@ -9,28 +9,34 @@ import akka.util.Timeout
 import scala.concurrent.duration._
 import scala.concurrent.Await
 import com.bfil.board.messages.Grabbed
+import akka.event.Logging
 
 class User extends Actor {
-  var grabbedItem: Option[ActorRef] = None
   
-  implicit val timeout: Timeout = Timeout(1 second)
+  val log = Logging(context.system, this)
+  
+  var grabbedItem: Option[ActorRef] = None
   
   def receive = {
     case Grab(item) => {
-      println(s"${self.path} grabbing ${item.path}")
+      log.info(s"grabbing ${item.path.name}")
       grabbedItem.foreach(_ ! Drop)
       item ! Grab
     }
     case Grabbed(item) => {
       grabbedItem = item
       grabbedItem match {
-        case Some(_) => println(s"${self.path} grabbed ${item.map(_.path)}")
-        case None => println(s"${self.path} couldn't grab")
+        case Some(item) => log.info(s"grabbed ${item.path.name}")
+        case None => log.warning(s"couldn't grab the item")
       }
     }
     case Drop => {
-      println(s"${self.path} dropping ${grabbedItem.map(_.path)}")
-      grabbedItem.foreach(_ ! Drop)
+      if(grabbedItem.isDefined) log.info(s"dropping ${grabbedItem.map(_.path.name).get}")
+      else log.info(s"nothing to drop")
+      grabbedItem.foreach { item =>
+        item ! Drop
+        grabbedItem = None
+      }
     }
   }
 }
