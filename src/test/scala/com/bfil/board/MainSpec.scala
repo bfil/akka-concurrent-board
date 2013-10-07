@@ -5,7 +5,10 @@ import scala.concurrent.duration.DurationInt
 import org.scalatest.{BeforeAndAfterAll, FlatSpec}
 import org.scalatest.matchers.ShouldMatchers
 
-import akka.actor.{ActorSystem, Props, actorRef2Scala}
+import com.bfil.board.actors.{StickyNote, User}
+import com.bfil.board.messages.Grab
+
+import akka.actor.{ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 
 class MainSpec(_system: ActorSystem)
@@ -22,18 +25,23 @@ class MainSpec(_system: ActorSystem)
     system.awaitTermination(10.seconds)
   }
   
-  /*
-  "A Greeter" should "be able to set a new greeting" in {
-    val greeter = TestActorRef(Props[Greeter])
-    greeter ! WhoToGreet("test")
-    greeter.underlyingActor.asInstanceOf[Greeter].greeting should be("hello, test")
+  "An user" should "be able to grab a stickyNote" in {
+    val user = TestActorRef(Props[User])
+    val stickyNote = TestActorRef(Props[StickyNote])
+    user ! Grab(stickyNote)
+    user.underlyingActor.asInstanceOf[User].grabbedItem.get should be(stickyNote)
+    stickyNote.underlyingActor.asInstanceOf[StickyNote].grabbedBy.get should be(user)
   }
-
-  it should "be able to get a new greeting" in {
-    val greeter = system.actorOf(Props[Greeter], "greeter")
-    greeter ! WhoToGreet("test")
-    greeter ! Greet
-    expectMsgType[Greeting].message.toString should be("hello, test")
+  
+  "An user" should "not be able to grab a stickyNote grabbed by another user" in {
+    val user = TestActorRef(Props[User])
+    val user2 = TestActorRef(Props[User])
+    val stickyNote = TestActorRef(Props[StickyNote])
+    user ! Grab(stickyNote)
+    user2 ! Grab(stickyNote)
+    user.underlyingActor.asInstanceOf[User].grabbedItem should be(Some(stickyNote))
+    stickyNote.underlyingActor.asInstanceOf[StickyNote].grabbedBy should be(Some(user))
+    user2.underlyingActor.asInstanceOf[User].grabbedItem should be(None)
   }
-  */
+  
 }

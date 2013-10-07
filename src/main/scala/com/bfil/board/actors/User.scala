@@ -1,16 +1,8 @@
 package com.bfil.board.actors
 
-import akka.actor.Actor
-import akka.actor.ActorRef
-import com.bfil.board.messages.Grab
-import com.bfil.board.messages.Drop
-import akka.pattern.ask
-import akka.util.Timeout
-import scala.concurrent.duration._
-import scala.concurrent.Await
-import com.bfil.board.messages.Grabbed
-import akka.actor.ActorLogging
-import com.bfil.board.messages.NotGrabbed
+import com.bfil.board.messages.{Drop, Grab, Grabbed, NotGrabbed}
+
+import akka.actor.{Actor, ActorLogging, ActorRef, actorRef2Scala}
 
 class User extends Actor with ActorLogging {
   var grabbedItem: Option[ActorRef] = None

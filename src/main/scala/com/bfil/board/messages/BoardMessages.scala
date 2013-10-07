@@ -1,6 +1,5 @@
 package com.bfil.board.messages
 
-import com.bfil.board.actors.StickyNote
 import akka.actor.ActorRef
 
 case object Grab

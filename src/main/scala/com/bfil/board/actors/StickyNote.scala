@@ -1,11 +1,8 @@
 package com.bfil.board.actors
 
-import akka.actor.Actor
-import com.bfil.board.messages.Grab
-import akka.actor.ActorRef
-import com.bfil.board.messages.Drop
-import com.bfil.board.messages.Grabbed
-import com.bfil.board.messages.NotGrabbed
+import com.bfil.board.messages.{Drop, Grab, Grabbed, NotGrabbed}
+
+import akka.actor.{Actor, ActorRef, actorRef2Scala}
 
 class StickyNote extends Actor {
   var text = ""
