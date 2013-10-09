@@ -11,8 +11,8 @@ object Main extends App {
 
   val system = ActorSystem("board")
 
-  val user = system.actorOf(Props[User], "user")
-  val user2 = system.actorOf(Props[User], "user2")
+  val user = system.actorOf(User.props("user"), "user")
+  val user2 = system.actorOf(User.props("user2"), "user2")
   val stickyNote = system.actorOf(Props[StickyNote], "stickyNote")
   val stickyNote2 = system.actorOf(Props[StickyNote], "stickyNote2")
 

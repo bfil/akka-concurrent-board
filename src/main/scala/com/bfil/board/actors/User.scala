@@ -1,10 +1,10 @@
 package com.bfil.board.actors
 
 import com.bfil.board.messages.{Drop, Grab, Grabbed, NotGrabbed}
-
 import akka.actor.{Actor, ActorLogging, ActorRef, actorRef2Scala}
+import akka.actor.Props
 
-class User extends Actor with ActorLogging {
+class User(name: String) extends Actor with ActorLogging {
   var grabbedItem: Option[ActorRef] = None
   
   def dropItem = {
@@ -30,11 +30,15 @@ class User extends Actor with ActorLogging {
     case Grabbed => {
       grabbedItem = Some(item)
       log.info(s"grabbed ${item.path.name}")
-      context.become(receive)
+      context.unbecome()
     }
     case NotGrabbed => {
       log.info(s"could not grab ${item.path.name}")
-      context.become(receive)
+      context.unbecome()
     }
   }
+}
+
+object User {
+  def props(name: String): Props = Props(classOf[User], name)
 }

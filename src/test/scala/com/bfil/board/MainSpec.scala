@@ -24,7 +24,7 @@ class MainSpec(_system: ActorSystem)
   }
   
   "An user" should "be able to grab a stickyNote" in {
-    val user = TestActorRef(Props[User])
+    val user = TestActorRef(User.props("user"))
     val stickyNote = TestActorRef(Props[StickyNote])
     user ! Grab(stickyNote)
     user.underlyingActor.asInstanceOf[User].grabbedItem.get should be(stickyNote)
@@ -32,8 +32,8 @@ class MainSpec(_system: ActorSystem)
   }
   
   "An user" should "not be able to grab a stickyNote grabbed by another user" in {
-    val user = TestActorRef(Props[User])
-    val user2 = TestActorRef(Props[User])
+    val user = TestActorRef(User.props("user"))
+    val user2 = TestActorRef(User.props("user2"))
     val stickyNote = TestActorRef(Props[StickyNote])
     user ! Grab(stickyNote)
     user2 ! Grab(stickyNote)
@@ -43,7 +43,7 @@ class MainSpec(_system: ActorSystem)
   }
   
   "An user" should "be able to drop a stickyNote after grabbing it" in {
-    val user = TestActorRef(Props[User])
+    val user = TestActorRef(User.props("user"))
     val stickyNote = TestActorRef(Props[StickyNote])
     user ! Grab(stickyNote)
     user.underlyingActor.asInstanceOf[User].grabbedItem should be(Some(stickyNote))
@@ -54,7 +54,7 @@ class MainSpec(_system: ActorSystem)
   }
   
   "An user" should "drop the current grabbed note before grabbing a new one" in {
-    val user = TestActorRef(Props[User])
+    val user = TestActorRef(User.props("user"))
     val stickyNote = TestActorRef(Props[StickyNote])
     val stickyNote2 = TestActorRef(Props[StickyNote])
     user ! Grab(stickyNote)
