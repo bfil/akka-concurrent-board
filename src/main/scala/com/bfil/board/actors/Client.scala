@@ -4,7 +4,7 @@ import com.bfil.board.messages.{Drop, Grab, Grabbed, NotGrabbed}
 import akka.actor.{Actor, ActorLogging, ActorRef, actorRef2Scala}
 import akka.actor.Props
 
-class User(name: String) extends Actor with ActorLogging {
+class Client(ipAddress: String) extends Actor with ActorLogging {
   var grabbedItem: Option[ActorRef] = None
   
   def dropItem = {
@@ -39,6 +39,6 @@ class User(name: String) extends Actor with ActorLogging {
   }
 }
 
-object User {
-  def props(name: String): Props = Props(classOf[User], name)
+object Client {
+  def props(name: String): Props = Props(classOf[Client], name)
 }

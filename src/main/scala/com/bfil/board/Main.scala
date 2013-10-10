@@ -2,28 +2,31 @@ package com.bfil.board
 
 import scala.concurrent.duration.DurationDouble
 
-import com.bfil.board.actors.{StickyNote, User}
-import com.bfil.board.messages.{Drop, Grab}
+import com.bfil.board.actors.{Board, Client, Note}
+import com.bfil.board.messages.{AddNote, ConnectClient, Drop, Grab}
 
 import akka.actor.{ActorSystem, Props, actorRef2Scala}
 
 object Main extends App {
 
-  val system = ActorSystem("board")
+  val system = ActorSystem("concurrent-board")
 
-  val user = system.actorOf(User.props("user"), "user")
-  val user2 = system.actorOf(User.props("user2"), "user2")
-  val stickyNote = system.actorOf(Props[StickyNote], "stickyNote")
-  val stickyNote2 = system.actorOf(Props[StickyNote], "stickyNote2")
+  val board = system.actorOf(Props[Board], "board")
+  val client = system.actorOf(Client.props("client"), "client")
+  val client2 = system.actorOf(Client.props("client2"), "client2")
+  val note = system.actorOf(Props[Note], "note")
+  val note2 = system.actorOf(Props[Note], "note2")
 
   sequence(0.05,
-    user ! Grab(stickyNote),
-    user2 ! Grab(stickyNote),
-    user ! Drop,
-    user2 ! Grab(stickyNote),
-    user ! Grab(stickyNote2),
-    user ! Grab(stickyNote),
-    user ! Drop)
+    board ! AddNote,
+    board ! ConnectClient("127.0.0.1"),
+    client ! Grab(note),
+    client2 ! Grab(note),
+    client ! Drop,
+    client2 ! Grab(note),
+    client ! Grab(note2),
+    client ! Grab(note),
+    client ! Drop)
 
   def sequence(delay: Double, tasks: ByName[Unit]*) = {
     val totalTime = tasks.foldLeft(0.0)((time, task) => {

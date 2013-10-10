@@ -3,7 +3,7 @@ package com.bfil.board
 import scala.concurrent.duration.DurationInt
 import org.scalatest.{BeforeAndAfterAll, FlatSpec}
 import org.scalatest.matchers.ShouldMatchers
-import com.bfil.board.actors.{StickyNote, User}
+import com.bfil.board.actors.{Note, Client}
 import com.bfil.board.messages.Grab
 import akka.actor.{ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
@@ -23,47 +23,47 @@ class MainSpec(_system: ActorSystem)
     system.awaitTermination(10.seconds)
   }
   
-  "An user" should "be able to grab a stickyNote" in {
-    val user = TestActorRef(User.props("user"))
-    val stickyNote = TestActorRef(Props[StickyNote])
-    user ! Grab(stickyNote)
-    user.underlyingActor.asInstanceOf[User].grabbedItem.get should be(stickyNote)
-    stickyNote.underlyingActor.asInstanceOf[StickyNote].grabbedBy.get should be(user)
+  "A client" should "be able to grab a note" in {
+    val client = TestActorRef(Client.props("client"))
+    val note = TestActorRef(Props[Note])
+    client ! Grab(note)
+    client.underlyingActor.asInstanceOf[Client].grabbedItem.get should be(note)
+    note.underlyingActor.asInstanceOf[Note].owner.get should be(client)
   }
   
-  "An user" should "not be able to grab a stickyNote grabbed by another user" in {
-    val user = TestActorRef(User.props("user"))
-    val user2 = TestActorRef(User.props("user2"))
-    val stickyNote = TestActorRef(Props[StickyNote])
-    user ! Grab(stickyNote)
-    user2 ! Grab(stickyNote)
-    user.underlyingActor.asInstanceOf[User].grabbedItem should be(Some(stickyNote))
-    stickyNote.underlyingActor.asInstanceOf[StickyNote].grabbedBy should be(Some(user))
-    user2.underlyingActor.asInstanceOf[User].grabbedItem should be(None)
+  "A client" should "not be able to grab a note grabbed by another client" in {
+    val client = TestActorRef(Client.props("client"))
+    val client2 = TestActorRef(Client.props("client2"))
+    val note = TestActorRef(Props[Note])
+    client ! Grab(note)
+    client2 ! Grab(note)
+    client.underlyingActor.asInstanceOf[Client].grabbedItem should be(Some(note))
+    note.underlyingActor.asInstanceOf[Note].owner should be(Some(client))
+    client2.underlyingActor.asInstanceOf[Client].grabbedItem should be(None)
   }
   
-  "An user" should "be able to drop a stickyNote after grabbing it" in {
-    val user = TestActorRef(User.props("user"))
-    val stickyNote = TestActorRef(Props[StickyNote])
-    user ! Grab(stickyNote)
-    user.underlyingActor.asInstanceOf[User].grabbedItem should be(Some(stickyNote))
-    stickyNote.underlyingActor.asInstanceOf[StickyNote].grabbedBy should be(Some(user))
-    user ! Drop
-    user.underlyingActor.asInstanceOf[User].grabbedItem should be(None)
-    stickyNote.underlyingActor.asInstanceOf[StickyNote].grabbedBy should be(None)
+  "A client" should "be able to drop a note after grabbing it" in {
+    val client = TestActorRef(Client.props("client"))
+    val note = TestActorRef(Props[Note])
+    client ! Grab(note)
+    client.underlyingActor.asInstanceOf[Client].grabbedItem should be(Some(note))
+    note.underlyingActor.asInstanceOf[Note].owner should be(Some(client))
+    client ! Drop
+    client.underlyingActor.asInstanceOf[Client].grabbedItem should be(None)
+    note.underlyingActor.asInstanceOf[Note].owner should be(None)
   }
   
-  "An user" should "drop the current grabbed note before grabbing a new one" in {
-    val user = TestActorRef(User.props("user"))
-    val stickyNote = TestActorRef(Props[StickyNote])
-    val stickyNote2 = TestActorRef(Props[StickyNote])
-    user ! Grab(stickyNote)
-    user.underlyingActor.asInstanceOf[User].grabbedItem should be(Some(stickyNote))
-    stickyNote.underlyingActor.asInstanceOf[StickyNote].grabbedBy should be(Some(user))
-    user ! Grab(stickyNote2)
-    user.underlyingActor.asInstanceOf[User].grabbedItem should be(Some(stickyNote2))
-    stickyNote2.underlyingActor.asInstanceOf[StickyNote].grabbedBy should be(Some(user))
-    stickyNote.underlyingActor.asInstanceOf[StickyNote].grabbedBy should be(None)
+  "A client" should "drop the current grabbed note before grabbing a new one" in {
+    val client = TestActorRef(Client.props("client"))
+    val note = TestActorRef(Props[Note])
+    val note2 = TestActorRef(Props[Note])
+    client ! Grab(note)
+    client.underlyingActor.asInstanceOf[Client].grabbedItem should be(Some(note))
+    note.underlyingActor.asInstanceOf[Note].owner should be(Some(client))
+    client ! Grab(note2)
+    client.underlyingActor.asInstanceOf[Client].grabbedItem should be(Some(note2))
+    note2.underlyingActor.asInstanceOf[Note].owner should be(Some(client))
+    note.underlyingActor.asInstanceOf[Note].owner should be(None)
   }
   
 }
