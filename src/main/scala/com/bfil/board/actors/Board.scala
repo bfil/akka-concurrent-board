@@ -24,6 +24,6 @@ class Board extends Actor with ActorLogging {
       notes ::= newNote
       log.info(s"${newNote.path.name} added")
     }
-    case _ => Unit
+    case x => log.info(x.toString) 
   }
 }
