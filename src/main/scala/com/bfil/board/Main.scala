@@ -30,11 +30,10 @@ object Main extends App {
     client ! Drop)
 
   def sequence(delay: Double, tasks: ByName[Unit]*) = {
-    val totalTime = tasks.foldLeft(0.0)((time, task) => {
+    tasks.foldLeft(0.0)((time, task) => {
       system.scheduler.scheduleOnce(time seconds)(task())(system.dispatcher)
       time + delay
     })
-    system.scheduler.scheduleOnce(totalTime seconds)(system.shutdown)(system.dispatcher)
   }
   
   implicit class ByName[T]( f: => T ) {
