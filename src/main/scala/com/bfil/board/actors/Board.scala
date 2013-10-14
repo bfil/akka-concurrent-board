@@ -1,6 +1,6 @@
 package com.bfil.board.actors
 
-import com.bfil.board.messages.{ AddNote, CannotConnect, Connected, Join, Quit }
+import com.bfil.board.messages.{ AddNote, CannotJoin, Joined, Join, Quit }
 
 import akka.actor.{ Actor, ActorLogging, ActorRef, Kill, Props, actorRef2Scala }
 
@@ -14,10 +14,10 @@ class Board extends Actor with ActorLogging {
       if (!users.contains(username)) {
         val user = context.actorOf(User.props(username), username)
         users = users + (username -> user)
-        sender ! Connected
-        log.info(s"$username connected")
+        sender ! Joined(username)
+        log.info(s"$username joined")
       } else {
-        sender ! CannotConnect("Username already taken")
+        sender ! CannotJoin("Username already taken")
         log.info(s"$username cannot connect: Username already taken")
       }
     }
@@ -28,7 +28,7 @@ class Board extends Actor with ActorLogging {
         users = users - username
       }
     }
-    case AddNote => {
+    case AddNote() => {
       noteId += 1
       val newNote = context.actorOf(Props[Note], s"note-$noteId")
       notes = notes + newNote

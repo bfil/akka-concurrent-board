@@ -1,11 +1,10 @@
 package com.bfil.board
 
 import scala.concurrent.duration.DurationDouble
-
 import com.bfil.board.actors.Board
 import com.typesafe.config.ConfigFactory
-
-import akka.actor.{ActorSystem, Props, actorRef2Scala}
+import akka.actor.{ ActorSystem, Props, actorRef2Scala }
+import com.bfil.board.servers.WebSocketServer
 
 object Main extends App {
 
@@ -21,8 +20,10 @@ object Main extends App {
       time + delay
     })
   }
-  
-  implicit class ByName[T]( f: => T ) {
+
+  implicit class ByName[T](f: => T) {
     def apply(): T = f
   }
+  
+  WebSocketServer(board).get.start
 }
