@@ -25,5 +25,5 @@ object Main extends App {
     def apply(): T = f
   }
   
-  WebSocketServer(board).get.start
+  WebSocketServer(board).start
 }

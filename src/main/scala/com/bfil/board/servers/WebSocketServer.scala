@@ -18,13 +18,9 @@ import com.bfil.board.messages.JoinMessage
 import com.bfil.board.messages.AddNoteMessage
 import com.bfil.board.messages.NoteAdded
 
-case class WebSocketServer(board: ActorRef) {
-
-  implicit def stringToTextMessage(s: String) = TextMessage(s)
-  implicit val formats = DefaultFormats
-  implicit val timeout = Timeout(1 second)
-
-  val get = (HookupServer(8125) {
+object WebSocketServer {
+  
+  def apply(board: ActorRef) = (HookupServer(8125) {
     new HookupServerClient {
 
       var usernames = Map.empty[Int, String]
@@ -39,7 +35,7 @@ case class WebSocketServer(board: ActorRef) {
             case Some(username) => {
               usernames -= id
               board ! Quit(username)
-              broadcast(toJson(Quit(username)))
+              broadcast(Quit(username))
             }
             case None =>
           }
@@ -54,21 +50,22 @@ case class WebSocketServer(board: ActorRef) {
 
         case JoinMessage(message) =>
           val username = message.username
+          implicit val timeout = Timeout(1 second)
           board ? message map {
             case joined @ Joined(username) =>
               usernames += (id -> username)
-              send(toJson(joined))
-              broadcast(toJson(joined))
+              send(joined)
+              broadcast(joined)
             case e @ CannotJoin(error) =>
-              send(toJson(e))
+              send(e)
           }
 
         case AddNoteMessage(message) =>
           board ! message
           usernames.get(id) match {
             case Some(username) => {
-              send(toJson(NoteAdded(username)))
-              broadcast(toJson(NoteAdded(username)))
+              send(NoteAdded(username))
+              broadcast(NoteAdded(username))
             }
             case None =>
           }
@@ -79,7 +76,10 @@ case class WebSocketServer(board: ActorRef) {
       }
     }
   })
-
-  def toJson(message: AnyRef) =
-    "{\"message\":\"" + message.getClass.getSimpleName().replace("$", "") + "\",\"data\":" + write(message) + "}"
+  
+  implicit def stringToTextMessage(s: String) = TextMessage(s)
+  implicit def toJson(message: AnyRef): OutboundMessage = {
+    implicit val formats = DefaultFormats
+    "{\"message\":\"" + message.getClass.getSimpleName.replace("$", "") + "\",\"data\":" + write(message) + "}"
+  }
 }
