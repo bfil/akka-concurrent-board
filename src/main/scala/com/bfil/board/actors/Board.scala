@@ -1,8 +1,8 @@
 package com.bfil.board.actors
 
-import com.bfil.board.messages.{ AddNote, CannotJoin, Joined, Join, Quit }
+import com.bfil.board.messages.{AddNote, CannotJoin, Join, Joined, Quit}
 
-import akka.actor.{ Actor, ActorLogging, ActorRef, Kill, Props, actorRef2Scala }
+import akka.actor.{Actor, ActorLogging, ActorRef, Kill, Props, actorRef2Scala}
 
 class Board extends Actor with ActorLogging {
   var users = Map.empty[String, ActorRef]

@@ -1,10 +1,12 @@
 package com.bfil.board
 
 import scala.concurrent.duration.DurationDouble
+
 import com.bfil.board.actors.Board
-import com.typesafe.config.ConfigFactory
-import akka.actor.{ ActorSystem, Props, actorRef2Scala }
 import com.bfil.board.servers.WebSocketServer
+import com.typesafe.config.ConfigFactory
+
+import akka.actor.{ActorSystem, Props}
 
 object Main extends App {
 
