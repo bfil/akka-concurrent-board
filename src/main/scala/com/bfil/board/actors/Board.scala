@@ -33,12 +33,12 @@ class Board extends Actor with ActorLogging {
         users -= username
       }
     }
-    case AddNote() => {
+    case AddNote(text) => {
       noteId += 1
       val newNote = context.actorOf(Props[Note], s"note-$noteId")
       notes += (noteId -> newNote)
-      notesPositions += (noteId -> (Random.nextInt(600),Random.nextInt(600)))
-      notesTexts += (noteId -> Random.alphanumeric.take(10).mkString)
+      notesPositions += (noteId -> (Random.nextInt(600), Random.nextInt(300)))
+      notesTexts += (noteId -> text)
       log.info(s"${newNote.path.name} added")
       context.parent ! BoardUpdate(notes.keys.toList, notesPositions.values.map{case(x,y) => List(x,y)}.toList, notesTexts.values.toList)
     }

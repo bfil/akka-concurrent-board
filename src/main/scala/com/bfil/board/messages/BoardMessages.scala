@@ -7,7 +7,7 @@ case class Joined(username: String)
 case class CannotJoin(error: String)
 case class Quit(username: String)
 
-case class AddNote
+case class AddNote(text: String)
 case class NoteAdded(username: String)
 
 case object Grab
