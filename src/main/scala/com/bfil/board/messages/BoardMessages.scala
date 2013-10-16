@@ -9,6 +9,7 @@ case class Quit(username: String)
 
 case class AddNote(text: String)
 case class NoteAdded(username: String)
+case class MoveNote(id: Int, x: Int, y: Int)
 
 case object Grab
 case object Grabbed

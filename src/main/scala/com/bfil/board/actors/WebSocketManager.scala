@@ -1,12 +1,11 @@
 package com.bfil.board.actors
 
 import scala.concurrent.duration.DurationInt
-
 import com.bfil.board.messages.{AddNoteMessage, BoardUpdate, CannotJoin, ClientConnected, ClientDisconnected, JoinMessage, Joined, NoteAdded, Quit}
-
 import akka.actor.{Actor, ActorLogging, Props, actorRef2Scala}
 import akka.pattern.ask
 import akka.util.Timeout
+import com.bfil.board.messages.MoveNoteMessage
 
 class WebSocketManager(broadcastToAll: AnyRef => Unit) extends Actor with ActorLogging {
 
@@ -65,6 +64,9 @@ class WebSocketManager(broadcastToAll: AnyRef => Unit) extends Actor with ActorL
           broadcastToAll(NoteAdded(username))
         case None =>
       }
+    
+    case MoveNoteMessage(id, message) =>
+      board ! message
       
     case u @ BoardUpdate(_,_,_) => broadcastToAll(u)
   }

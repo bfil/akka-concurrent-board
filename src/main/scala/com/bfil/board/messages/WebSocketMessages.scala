@@ -26,3 +26,4 @@ case class ClientDisconnected(id: Int)
 
 case object JoinMessage extends Message[Join]
 case object AddNoteMessage extends Message[AddNote]
+case object MoveNoteMessage extends Message[MoveNote]

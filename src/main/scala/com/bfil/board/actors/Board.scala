@@ -1,10 +1,9 @@
 package com.bfil.board.actors
 
 import scala.util.Random
-
 import com.bfil.board.messages.{AddNote, BoardUpdate, CannotJoin, Join, Joined, Quit}
-
 import akka.actor.{Actor, ActorLogging, ActorRef, Kill, Props, actorRef2Scala}
+import com.bfil.board.messages.MoveNote
 
 class Board extends Actor with ActorLogging {
   var users = Map.empty[String, ActorRef]
@@ -12,6 +11,13 @@ class Board extends Actor with ActorLogging {
   var notesPositions = Map.empty[Int, (Int, Int)]
   var notesTexts = Map.empty[Int, String]
   var noteId = 0
+  
+  def boardUpdated() = {
+    context.parent ! BoardUpdate(
+        notes.keys.toList.sortWith(_ < _),
+        notesPositions.toSeq.sortWith(_._1 < _._1).map{case (k,(x,y)) => List(x,y)}.toList,
+        notesTexts.toSeq.sortWith(_._1 < _._1).map{case (k,text) => text}.toList)
+  }
 
   def receive = {
     case Join(username) => {
@@ -40,7 +46,12 @@ class Board extends Actor with ActorLogging {
       notesPositions += (noteId -> (Random.nextInt(600), Random.nextInt(300)))
       notesTexts += (noteId -> text)
       log.info(s"${newNote.path.name} added")
-      context.parent ! BoardUpdate(notes.keys.toList, notesPositions.values.map{case(x,y) => List(x,y)}.toList, notesTexts.values.toList)
+      boardUpdated()
+    }
+    case MoveNote(id, x, y) => {
+      notesPositions += (id -> (x, y))
+      log.info(s"note-$id moved")
+      boardUpdated()
     }
     case x => log.info(s"Unknown message: ${x.toString}")
   }
