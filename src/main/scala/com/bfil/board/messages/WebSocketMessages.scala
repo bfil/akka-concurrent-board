@@ -14,15 +14,14 @@ trait Message[T] {
     else None
   }
   
-  def messageName[T](implicit m: Manifest[T]) = {
+  def messageName[T](implicit m: Manifest[T]) =
     m.erasure.getSimpleName
-  }
 }
 
 case class WebSocketMessage(clientId: Int, message: JValue)
 
-case class ClientConnected(id: Int, channel: AnyRef => Unit, broadcast: AnyRef => Unit)
-case class ClientDisconnected(id: Int)
+case class ClientConnected(clientId: Int, channel: AnyRef => Unit, broadcast: AnyRef => Unit)
+case class ClientDisconnected(clientId: Int)
 
 case object JoinMessage extends Message[Join]
 case object AddNoteMessage extends Message[AddNote]
