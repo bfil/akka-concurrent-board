@@ -1,40 +1,51 @@
 package com.bfil.board.actors
 
-import com.bfil.board.messages.{Drop, Grab, Grabbed, NotGrabbed}
-import akka.actor.{Actor, ActorLogging, ActorRef, actorRef2Scala}
-import akka.actor.Props
+import com.bfil.board.messages.GetUsername
+import com.bfil.board.messages.Note.{Drop, Grab, Grabbed, NotGrabbed}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props, actorRef2Scala}
+import com.bfil.board.messages.User.GrabNote
+import com.bfil.board.messages.User.MoveNote
+import com.bfil.board.messages.Note.Move
 
 class User(username: String) extends Actor with ActorLogging {
-  var grabbedItem: Option[ActorRef] = None
+  var grabbedNote: Option[ActorRef] = None
   
-  def dropItem = {
-    if(grabbedItem.isDefined) log.info(s"dropping ${grabbedItem.map(_.path.name).get}")
+  def dropNote = {
+    if(grabbedNote.isDefined) log.info(s"dropping ${grabbedNote.map(_.path.name).get}")
     else log.info(s"nothing to drop")
-    grabbedItem.foreach(_ ! Drop)
-    grabbedItem = None
+    grabbedNote.foreach(_ ! Drop)
+    grabbedNote = None
   }
   
   def receive = {
     
-    case Grab(item) =>
-      log.info(s"grabbing ${item.path.name}")
-      dropItem
-      item ! Grab
-      context.become(grabbing(item))
+    case GetUsername =>
+      sender ! username
+    
+    case GrabNote(note) =>
+      log.info(s"grabbing ${note.path.name}")
+      dropNote
+      note ! Grab
+      context.become(grabbing(sender, note))
+      
+    case MoveNote(note, x, y) =>
+      note ! Move(x, y)
       
     case Drop =>
-      dropItem
+      dropNote
   }
   
-  def grabbing(item: ActorRef): Receive = {
+  def grabbing(notify: ActorRef, note: ActorRef): Receive = {
     
     case Grabbed =>
-      grabbedItem = Some(item)
-      log.info(s"grabbed ${item.path.name}")
+      grabbedNote = Some(note)
+      notify ! Grabbed
+      log.info(s"grabbed ${note.path.name}")
       context.unbecome()
     
     case NotGrabbed =>
-      log.info(s"could not grab ${item.path.name}")
+      notify ! NotGrabbed
+      log.info(s"could not grab ${note.path.name}")
       context.unbecome()
     
   }

@@ -31,8 +31,7 @@ class WebSocketServer extends Actor {
           webSocketManager ! (id, text.content)
 
         case json: JsonMessage =>
-          implicit val _id = id 
-          webSocketManager ! WebSocketMessage(json.content)
+          webSocketManager ! WebSocketMessage(id, json.content)
       }
     }
   })
