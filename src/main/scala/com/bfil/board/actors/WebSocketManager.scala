@@ -1,7 +1,7 @@
 package com.bfil.board.actors
 
 import scala.concurrent.duration.DurationInt
-import com.bfil.board.messages.{ AddNoteMessage, BoardUpdate, CannotJoin, ClientConnected, ClientDisconnected, JoinMessage, Joined, NoteAdded, Quit }
+import com.bfil.board.messages.{ AddNoteMessage, BoardUpdate, CannotJoin, ClientConnected, ClientDisconnected, JoinMessage, Joined, Quit }
 import akka.actor.{ Actor, ActorLogging, Props, actorRef2Scala }
 import akka.pattern.ask
 import akka.util.Timeout
@@ -10,6 +10,7 @@ import com.bfil.board.messages.MoveNoteMessage
 class WebSocketManager(broadcastToAll: AnyRef => Unit) extends Actor with ActorLogging {
 
   implicit val executionContext = scala.concurrent.ExecutionContext.Implicits.global
+  implicit val timeout = Timeout(1 second)
 
   var connections = Map.empty[Int, (AnyRef => Unit, AnyRef => Unit)]
   var usernames = Map.empty[Int, String]
@@ -21,14 +22,18 @@ class WebSocketManager(broadcastToAll: AnyRef => Unit) extends Actor with ActorL
 
   def broadcast(clientId: Int, message: AnyRef) =
     connections.get(clientId).foreach { case (channel, broadcast) => broadcast(message) }
+  
+  def withUsername(clientId: Int)(f: String => Unit) {
+    usernames.get(clientId).foreach(f)
+  }
 
   def receive = {
 
     case ClientConnected(clientId, channel, broadcast) =>
-      connections += (clientId -> (channel, broadcast))
+      connections += clientId -> (channel, broadcast)
 
     case ClientDisconnected(clientId) =>
-      usernames.get(clientId).foreach { username =>
+       withUsername(clientId) { username =>
         usernames -= clientId
         board ! Quit(username)
         broadcast(clientId, Quit(username))
@@ -37,26 +42,22 @@ class WebSocketManager(broadcastToAll: AnyRef => Unit) extends Actor with ActorL
     case (clientId: Int, text: String) =>
       println("Received text message \"" + text + "\" from " + clientId)
 
-    case JoinMessage(clientId, message) =>
-      val username = message.username
-
-      implicit val timeout = Timeout(1 second)
+    case m @ JoinMessage(message) =>
       board ? message map {
         case joined @ Joined(username) =>
-          usernames += (clientId -> username)
+          usernames += m.clientId -> username
           broadcastToAll(joined)
         case e @ CannotJoin(error) =>
-          send(clientId, e)
+          send(m.clientId, e)
       }
 
-    case AddNoteMessage(clientId, message) =>
-      board ! message
-      usernames.get(clientId).foreach(username => broadcastToAll(NoteAdded(username)))
-
-    case MoveNoteMessage(clientId, message) =>
+    case m @ AddNoteMessage(message) =>
       board ! message
 
-    case u @ BoardUpdate(_, _, _) => broadcastToAll(u)
+    case MoveNoteMessage(message) =>
+      board ! message
+
+    case u @ BoardUpdate(users, notes) => broadcastToAll(u)
   }
 }
 

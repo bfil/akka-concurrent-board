@@ -9,8 +9,9 @@ trait Message[T] {
   
   def unapply(m : WebSocketMessage)(implicit mf: Manifest[T]) = {
     val json = m.message
+    implicit val clientId = m.clientId
     if(json \ "message" == JString(messageName[T]))
-    	Some((m.clientId, (json \ "data").extract[T]))
+    	Some(((json \ "data").extract[T]))
     else None
   }
   
@@ -18,7 +19,9 @@ trait Message[T] {
     m.erasure.getSimpleName
 }
 
-case class WebSocketMessage(clientId: Int, message: JValue)
+case class WebSocketMessage(message: JValue)(implicit _clientId: Int) {
+  val clientId = _clientId
+}
 
 case class ClientConnected(clientId: Int, channel: AnyRef => Unit, broadcast: AnyRef => Unit)
 case class ClientDisconnected(clientId: Int)

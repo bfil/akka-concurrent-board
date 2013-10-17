@@ -15,27 +15,28 @@ class User(username: String) extends Actor with ActorLogging {
   }
   
   def receive = {
-    case Grab(item) => {
+    
+    case Grab(item) =>
       log.info(s"grabbing ${item.path.name}")
       dropItem
       item ! Grab
       context.become(grabbing(item))
-    }
-    case Drop => {
+      
+    case Drop =>
       dropItem
-    }
   }
   
   def grabbing(item: ActorRef): Receive = {
-    case Grabbed => {
+    
+    case Grabbed =>
       grabbedItem = Some(item)
       log.info(s"grabbed ${item.path.name}")
       context.unbecome()
-    }
-    case NotGrabbed => {
+    
+    case NotGrabbed =>
       log.info(s"could not grab ${item.path.name}")
       context.unbecome()
-    }
+    
   }
 }
 

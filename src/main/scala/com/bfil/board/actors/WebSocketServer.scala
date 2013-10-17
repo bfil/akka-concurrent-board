@@ -3,7 +3,7 @@ package com.bfil.board.actors
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization.write
 
-import com.bfil.board.messages.{ClientConnected, ClientDisconnected, WebSocketMessage}
+import com.bfil.board.messages.{ClientConnected, ClientDisconnected, Start, Stop, WebSocketMessage}
 
 import akka.actor.{Actor, ActorRef, actorRef2Scala}
 import io.backchat.hookup.{Connected, Disconnected, Error, HookupServer, HookupServerClient, JsonMessage, OutboundMessage, TextMessage}
@@ -31,7 +31,8 @@ class WebSocketServer extends Actor {
           webSocketManager ! (id, text.content)
 
         case json: JsonMessage =>
-          webSocketManager ! WebSocketMessage(id, json.content)
+          implicit val _id = id 
+          webSocketManager ! WebSocketMessage(json.content)
       }
     }
   })
@@ -39,10 +40,9 @@ class WebSocketServer extends Actor {
   def broadcastProxy(message: AnyRef) = server.broadcast(message)
   val webSocketManager: ActorRef = context.actorOf(WebSocketManager.props(broadcastProxy), "websocket")
   
-  server.start
-  
   def receive = {
-    case _ =>
+    case Start => server.start
+    case Stop => server.stop
   }
 
   implicit def stringToTextMessage(s: String) = TextMessage(s)
