@@ -56,9 +56,9 @@ class Board extends Actor with ActorLogging {
           user =>
             user ! Drop
             user ! Kill
+            users -= username
+            boardUpdated()
         }
-        users -= username
-        boardUpdated()
       }
 
     case AddNote(username, text) =>
