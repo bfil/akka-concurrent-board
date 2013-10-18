@@ -3,14 +3,15 @@ package com.bfil.board.actors
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import scala.util.Random
-
 import com.bfil.board.messages.{ AddNote, BoardUpdate, CannotJoin, GetState, Grab, Join, Joined, Move, NoteState, Quit, UpdateBoard }
-import com.bfil.board.messages.User.{GrabNote,MoveNote}
+import com.bfil.board.messages.User.{ GrabNote, MoveNote }
 import com.bfil.board.messages.Note.Drop
-
 import akka.actor.{ Actor, ActorLogging, ActorRef, Kill, actorRef2Scala }
 import akka.pattern.ask
 import akka.util.Timeout
+import com.bfil.board.messages.Remove
+import com.bfil.board.messages.User.RemoveNote
+import com.bfil.board.messages.NoteRemoved
 
 class Board extends Actor with ActorLogging {
 
@@ -37,11 +38,18 @@ class Board extends Actor with ActorLogging {
 
     case Join(username) =>
       if (!users.contains(username)) {
-        val user = context.actorOf(User.props(username), username)
-        users += (username -> user)
-        sender ! Joined(username)
-        boardUpdated()
-        log.info(s"$username joined")
+
+        if (username.matches("[a-zA-Z0-9]{3,14}")) {
+          val user = context.actorOf(User.props(username), username)
+          users += (username -> user)
+          sender ! Joined(username)
+          boardUpdated()
+          log.info(s"$username joined")
+        } else {
+          val error = "username must only contain alphanumeric characters and must be between 3 and 14 characters long"
+          sender ! CannotJoin(error)
+          log.info(s"$username cannot connect: $error")
+        }
       } else {
         val error = "username already taken"
         sender ! CannotJoin(error)
@@ -82,6 +90,14 @@ class Board extends Actor with ActorLogging {
               user ! MoveNote(note, x, y)
               boardUpdated()
             }))
+            
+    case Remove(username, noteId) =>
+      users.get(username).foreach(
+        user =>
+          notes.get(noteId).foreach(
+            note => {
+              user ! RemoveNote(note)
+            }))
 
     case Grab(username, noteId) =>
       users.get(username).foreach(
@@ -95,6 +111,10 @@ class Board extends Actor with ActorLogging {
                   boardUpdated()
               }
             }))
+            
+    case NoteRemoved(id) =>
+      notes -= id
+      boardUpdated()
 
     case UpdateBoard =>
       boardUpdated()

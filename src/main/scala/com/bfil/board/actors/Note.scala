@@ -2,14 +2,13 @@ package com.bfil.board.actors
 
 import scala.concurrent.duration.DurationInt
 import scala.util.Random
-
 import com.bfil.board.messages.{ GetState, GetUsername }
 import com.bfil.board.messages.{ NoteState, UpdateBoard }
-import com.bfil.board.messages.Note.{ Drop, Grab, Grabbed, NotGrabbed, Move }
-
+import com.bfil.board.messages.Note.{ Drop, Grab, Grabbed, NotGrabbed, Move, Remove }
 import akka.actor.{ Actor, ActorRef, Props, actorRef2Scala }
 import akka.pattern.ask
 import akka.util.Timeout
+import com.bfil.board.messages.NoteRemoved
 
 class Note(id: Int, _text: String) extends Actor {
 
@@ -40,6 +39,13 @@ class Note(id: Int, _text: String) extends Actor {
 	      x = _x
 	      y = _y
 	      context.parent ! UpdateBoard
+        case _ =>
+      }
+      
+    case Remove =>
+      owner match {
+        case Some(ownedBy) if ownedBy == sender =>
+	      context.parent ! NoteRemoved(id)
         case _ =>
       }
 

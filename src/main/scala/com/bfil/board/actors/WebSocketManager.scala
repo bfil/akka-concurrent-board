@@ -13,6 +13,7 @@ import org.json4s.JsonAST.JField
 import org.json4s.JsonAST.JString
 import org.json4s.jackson.JsonMethods._
 import com.bfil.board.messages.GrabMessage
+import com.bfil.board.messages.RemoveMessage
 
 class WebSocketManager(broadcastToAll: AnyRef => Unit) extends Actor with ActorLogging {
 
@@ -49,6 +50,9 @@ class WebSocketManager(broadcastToAll: AnyRef => Unit) extends Actor with ActorL
       board ! message
 
     case MoveMessage(message) =>
+      board ! message
+      
+    case RemoveMessage(message) =>
       board ! message
       
     case GrabMessage(message) =>
