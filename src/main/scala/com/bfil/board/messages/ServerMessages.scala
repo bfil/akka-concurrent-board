@@ -1,4 +1,6 @@
 package com.bfil.board.messages
 
-case object Start
-case object Stop
+object Server {
+  case object Start
+  case object Stop
+}

@@ -1,10 +1,9 @@
 package com.bfil.board.actors
 
-import com.bfil.board.messages.GetUsername
-import com.bfil.board.messages.Note.{ Drop, Grab, Grabbed, Move, NotGrabbed, Remove }
-import com.bfil.board.messages.User.{ GrabNote, MoveNote, RemoveNote }
+import com.bfil.board.messages.Note.{Drop, Grab, Grabbed, Move, NotGrabbed, Remove}
+import com.bfil.board.messages.User.{GetUsername, GrabNote, MoveNote, RemoveNote, DropNote}
 
-import akka.actor.{ Actor, ActorLogging, ActorRef, Props, actorRef2Scala }
+import akka.actor.{Actor, ActorLogging, ActorRef, Props, actorRef2Scala}
 
 class User(username: String) extends Actor with ActorLogging {
   var grabbedNote: Option[ActorRef] = None
@@ -37,7 +36,7 @@ class User(username: String) extends Actor with ActorLogging {
         grabbedNote = None
       }
 
-    case Drop =>
+    case DropNote =>
       dropNote
   }
 

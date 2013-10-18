@@ -3,12 +3,13 @@ package com.bfil.board.actors
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization.write
 
-import com.bfil.board.messages.{ClientConnected, ClientDisconnected, Start, Stop, WebSocketMessage}
+import com.bfil.board.messages.Server.{Start, Stop}
+import com.bfil.board.messages.WebSocket.{ClientConnected, ClientDisconnected, WebSocketMessage}
 
 import akka.actor.{Actor, ActorRef, actorRef2Scala}
 import io.backchat.hookup.{Connected, Disconnected, Error, HookupServer, HookupServerClient, JsonMessage, OutboundMessage, TextMessage}
 
-class WebSocketServer extends Actor {
+class Server extends Actor {
 
   val server: HookupServer = (HookupServer(8125) {
     new HookupServerClient {
@@ -37,7 +38,7 @@ class WebSocketServer extends Actor {
   })
   
   def broadcastProxy(message: AnyRef) = server.broadcast(message)
-  val webSocketManager: ActorRef = context.actorOf(WebSocketManager.props(broadcastProxy), "websocket")
+  val webSocketManager: ActorRef = context.actorOf(WebSocket.props(broadcastProxy), "websocket")
   
   def receive = {
     case Start => server.start

@@ -1,17 +1,18 @@
 package com.bfil.board.actors
 
+import scala.annotation.migration
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import scala.util.Random
-import com.bfil.board.messages.{ AddNote, BoardUpdate, CannotJoin, GetState, Grab, Join, Joined, Move, NoteState, Quit, UpdateBoard }
-import com.bfil.board.messages.User.{ GrabNote, MoveNote }
-import com.bfil.board.messages.Note.Drop
-import akka.actor.{ Actor, ActorLogging, ActorRef, Kill, actorRef2Scala }
+
+import com.bfil.board.messages.{Board => BoardMessages}
+import com.bfil.board.messages.Note.{GetState, NoteState}
+import com.bfil.board.messages.{User => UserMessages}
+import com.bfil.board.messages.WebSocket.BoardUpdate
+
+import akka.actor.{Actor, ActorLogging, ActorRef, Kill, actorRef2Scala}
 import akka.pattern.ask
 import akka.util.Timeout
-import com.bfil.board.messages.Remove
-import com.bfil.board.messages.User.RemoveNote
-import com.bfil.board.messages.NoteRemoved
 
 class Board extends Actor with ActorLogging {
 
@@ -36,87 +37,87 @@ class Board extends Actor with ActorLogging {
 
   def receive = {
 
-    case Join(username) =>
+    case BoardMessages.Join(username) =>
       if (!users.contains(username)) {
 
         if (username.matches("[a-zA-Z0-9]{3,14}")) {
           val user = context.actorOf(User.props(username), username)
           users += (username -> user)
-          sender ! Joined(username)
+          sender ! BoardMessages.Joined(username)
           boardUpdated()
           log.info(s"$username joined")
         } else {
           val error = "username must only contain alphanumeric characters and must be between 3 and 14 characters long"
-          sender ! CannotJoin(error)
+          sender ! BoardMessages.CannotJoin(error)
           log.info(s"$username cannot connect: $error")
         }
       } else {
         val error = "username already taken"
-        sender ! CannotJoin(error)
+        sender ! BoardMessages.CannotJoin(error)
         log.info(s"$username cannot connect: $error")
       }
 
-    case Quit(username) =>
+    case BoardMessages.Quit(username) =>
       if (users.contains(username)) {
         log.info(s"$username disconnected")
 
         users.get(username).map {
           user =>
-            user ! Drop
+            user ! UserMessages.DropNote
             user ! Kill
             users -= username
             boardUpdated()
         }
       }
 
-    case AddNote(username, text) =>
+    case BoardMessages.AddNote(username, text) =>
       users.get(username) foreach { user =>
         val noteId = Random.nextInt
         val newNote = context.actorOf(Note.props(noteId, text), s"note-$noteId")
         notes += noteId -> newNote
         val requester = sender
-        user ? GrabNote(newNote) map {
+        user ? UserMessages.GrabNote(newNote) map {
           case x =>
             requester ! x
             boardUpdated()
         }
       }
 
-    case Move(username, noteId, x, y) =>
+    case BoardMessages.MoveNote(username, noteId, x, y) =>
       users.get(username).foreach(
         user =>
           notes.get(noteId).foreach(
             note => {
-              user ! MoveNote(note, x, y)
+              user ! UserMessages.MoveNote(note, x, y)
               boardUpdated()
             }))
             
-    case Remove(username, noteId) =>
+    case BoardMessages.RemoveNote(username, noteId) =>
       users.get(username).foreach(
         user =>
           notes.get(noteId).foreach(
             note => {
-              user ! RemoveNote(note)
+              user ! UserMessages.RemoveNote(note)
             }))
 
-    case Grab(username, noteId) =>
+    case BoardMessages.GrabNote(username, noteId) =>
       users.get(username).foreach(
         user =>
           notes.get(noteId).foreach(
             note => {
               val requester = sender
-              user ? GrabNote(note) map {
+              user ? UserMessages.GrabNote(note) map {
                 case x =>
                   requester ! x
                   boardUpdated()
               }
             }))
             
-    case NoteRemoved(id) =>
+    case BoardMessages.NoteRemoved(id) =>
       notes -= id
       boardUpdated()
 
-    case UpdateBoard =>
+    case BoardMessages.Update =>
       boardUpdated()
 
     case x => log.info(s"Unknown message: ${x.toString}")

@@ -1,21 +1,19 @@
 package com.bfil.board.actors
 
 import scala.concurrent.duration.DurationInt
-import com.bfil.board.messages.{ AddNoteMessage, BoardUpdate, CannotJoin, ClientConnected, ClientDisconnected, JoinMessage, Joined, Quit }
-import akka.actor.{ Actor, ActorLogging, Props, actorRef2Scala }
+
+import org.json4s.JsonAST.{JObject, JString, JValue}
+import org.json4s.jackson.JsonMethods.{pretty, render}
+import org.json4s.jvalue2monadic
+
+import com.bfil.board.messages.Board.{CannotJoin, Joined, Quit}
+import com.bfil.board.messages.WebSocket.{AddNoteMessage, BoardUpdate, ClientConnected, ClientDisconnected, GrabMessage, JoinMessage, MoveMessage, RemoveMessage, WebSocketMessage}
+
+import akka.actor.{Actor, ActorLogging, Props, actorRef2Scala}
 import akka.pattern.ask
 import akka.util.Timeout
-import com.bfil.board.messages.MoveMessage
-import com.bfil.board.messages.WebSocketMessage
-import org.json4s.JsonAST.JValue
-import org.json4s.JsonAST.JObject
-import org.json4s.JsonAST.JField
-import org.json4s.JsonAST.JString
-import org.json4s.jackson.JsonMethods._
-import com.bfil.board.messages.GrabMessage
-import com.bfil.board.messages.RemoveMessage
 
-class WebSocketManager(broadcastToAll: AnyRef => Unit) extends Actor with ActorLogging {
+class WebSocket(broadcastToAll: AnyRef => Unit) extends Actor with ActorLogging {
 
   implicit val executionContext = scala.concurrent.ExecutionContext.Implicits.global
   implicit val timeout = Timeout(1 second)
@@ -94,6 +92,6 @@ class WebSocketManager(broadcastToAll: AnyRef => Unit) extends Actor with ActorL
   }
 }
 
-object WebSocketManager {
-  def props(broadcast: AnyRef => Unit): Props = Props(classOf[WebSocketManager], broadcast)
+object WebSocket {
+  def props(broadcast: AnyRef => Unit): Props = Props(classOf[WebSocket], broadcast)
 }

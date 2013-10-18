@@ -1,15 +1,13 @@
 package com.bfil.board
 
-import com.bfil.board.actors.WebSocketServer
-import com.bfil.board.messages.Start
+import com.bfil.board.actors.Server
+import com.bfil.board.messages.Server.Start
 import com.typesafe.config.ConfigFactory
 
 import akka.actor.{ActorSystem, Props, actorRef2Scala}
 
 object Main extends App {
-
   val system = ActorSystem("concurrent-board", ConfigFactory.load())
-  val webSocketServer = system.actorOf(Props[WebSocketServer], "server")
-  webSocketServer ! Start
-  
+  val server = system.actorOf(Props[Server], "server")
+  server ! Start
 }
