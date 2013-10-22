@@ -4,15 +4,14 @@ import scala.annotation.migration
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import scala.util.Random
-
 import com.bfil.board.messages.{Board => BoardMessages}
 import com.bfil.board.messages.Note.{GetState, NoteState}
 import com.bfil.board.messages.{User => UserMessages}
 import com.bfil.board.messages.WebSocket.BoardUpdate
-
 import akka.actor.{Actor, ActorLogging, ActorRef, Kill, actorRef2Scala}
 import akka.pattern.ask
 import akka.util.Timeout
+import scala.collection.immutable.ListMap
 
 class Board extends Actor with ActorLogging {
 
@@ -20,7 +19,7 @@ class Board extends Actor with ActorLogging {
   implicit val timeout = Timeout(1 second)
 
   var users = Map.empty[String, ActorRef]
-  var notes = Map.empty[Int, ActorRef]
+  var notes = ListMap.empty[Int, ActorRef]
 
   def boardUpdated() = {
     val futureStates = notes.map {
@@ -85,12 +84,14 @@ class Board extends Actor with ActorLogging {
 
     case BoardMessages.MoveNote(username, noteId, x, y) =>
       users.get(username).foreach(
-        user =>
+        user => {
           notes.get(noteId).foreach(
             note => {
+              notes = notes - noteId + (noteId -> note)
               user ! UserMessages.MoveNote(note, x, y)
               boardUpdated()
-            }))
+            })
+        })
             
     case BoardMessages.RemoveNote(username, noteId) =>
       users.get(username).foreach(
