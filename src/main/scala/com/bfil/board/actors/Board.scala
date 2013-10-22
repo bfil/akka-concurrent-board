@@ -38,7 +38,7 @@ class Board extends Actor with ActorLogging {
   def receive = {
 
     case BoardMessages.Join(username) =>
-      if (!users.contains(username)) {
+      if (users.forall(_._1.toLowerCase != username.toLowerCase)) {
 
         if (username.matches("[a-zA-Z0-9]{3,14}")) {
           val user = context.actorOf(User.props(username), username)
