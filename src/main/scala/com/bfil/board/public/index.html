@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Concurrent Board</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet/less" type="text/css" href="public/styles.less" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/less.js/1.4.1/less.min.js" type="text/javascript"></script>
+    <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="public/board.js"></script>
+</head>
+<body>
+    <div class="navbar navbar-default" role="navigation">
+        <div class="navbar-header">
+        	<button id="navbar-toggler" type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-dropdown-collapse">
+		      	<span class="sr-only">Toggle navigation</span>
+		     	<span class="icon-bar"></span>
+		      	<span class="icon-bar"></span>
+		      	<span class="icon-bar"></span>
+		    </button>
+        	<a class="navbar-brand" href="/">Concurrent Board</a>
+        </div>
+        <div class="collapse navbar-collapse navbar-dropdown-collapse">
+	        <ul id="logged-in-dropdown" class="nav navbar-nav navbar-right">
+	      		<li class="dropdown">
+		       		<a href="#" class="dropdown-toggle" data-toggle="dropdown">Hello, <span id="connected-as"></span>! <b class="caret"></b></a>
+		       		<ul class="dropdown-menu">
+		         		<li><a id="disconnect" href="#"><span class="glyphicon glyphicon-log-out"></span>&nbsp;&nbsp;Exit the board</a></li>
+		        	</ul>
+	      		</li>
+	    	</ul>
+    	</div>
+    </div>
+    <div id="content">
+        <div id="board-container" class="col-md-12">
+	    <div id="board-and-users" class="col-md-8">
+	    	<div id="board">
+	    	</div>
+	    	<div id="users-container" class="well">
+	    		Users&nbsp;&nbsp;<span id="users"></span>
+	    	</div>
+	    </div>
+	    <div id="board-controls" class="col-md-4">
+		    <div class="panel panel-default">
+				<div class="panel-heading">
+			    	<h3 class="panel-title">Controls</h3>
+			  	</div>
+			  	<div class="panel-body">
+			    	<form>
+				    	<div class="input-group">
+				    		<input id="note-text" type="text" class="form-control" placeholder="Content">
+					      	<span class="input-group-btn">
+					        	<button id="add-note" class="btn btn-default">Add Note</button>
+					      	</span>
+					    </div>
+				    </form>
+			  	</div>
+		  	</div>
+	  	</div>
+    </div>
+    <div id="board-login" class="col-md-4 col-md-offset-4">
+    	<div  class="panel panel-default">
+			<div class="panel-heading">
+		    	<h3 class="panel-title">Join the board</h3>
+		  	</div>
+		  	<div class="panel-body">
+		    	<form>
+			    	<div class="input-group">
+			    		<input id="username" type="text" class="form-control" placeholder="Username">
+				      	<span class="input-group-btn">
+				        	<button id="connect" class="btn btn-default">Connect</button>
+				      	</span>
+				    </div>
+			    </form>
+		  	</div>
+	  	</div>
+	</div>
+    </div>
+    <div id="trash">
+	   	<span class="glyphicon glyphicon-trash"></span>
+	</div>
+</body>
+</html>
