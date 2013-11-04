@@ -4,8 +4,6 @@ version := "0.1"
 
 scalaVersion := "2.10.2"
 
-resolvers += "spray repo" at "http://repo.spray.io"
-
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % "2.2.3",
   "com.typesafe.akka" %% "akka-remote" % "2.2.3",
@@ -16,6 +14,6 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "1.9.1" % "test"
 )
 
-testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
-
 exportJars := true
+
+seq(Revolver.settings: _*)

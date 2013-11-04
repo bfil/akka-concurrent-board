@@ -1,20 +1,13 @@
 package com.bfil.board.actors
 
-import scala.concurrent.duration.DurationInt
-
-import akka.actor.Actor
-import akka.actor.ActorLogging
-import akka.util.Timeout
-import akka.util.Timeout.durationToTimeout
+import akka.actor.{Actor, ActorLogging}
 import spray.http.MediaType
 import spray.http.MediaTypes.register
 import spray.routing.Directive.pimpApply
 import spray.routing.HttpService
 
 class StaticServer extends Actor with ActorLogging with HttpService {
-  implicit val timeout: Timeout = 1 second
-  import context.dispatcher
-
+  
   def actorRefFactory = context
 
   val LessType = register(
