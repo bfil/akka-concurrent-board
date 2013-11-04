@@ -7,7 +7,7 @@ import org.json4s.jackson.JsonMethods.{pretty, render}
 import org.json4s.jvalue2monadic
 
 import com.bfil.board.messages.Board.{CannotJoin, Joined, Quit}
-import com.bfil.board.messages.WebSocket.{AddNoteMessage, BoardUpdate, ClientConnected, ClientDisconnected, GrabMessage, JoinMessage, MoveMessage, RemoveMessage, WebSocketMessage}
+import com.bfil.board.messages.WebSocket.{AddNoteMessage, BoardUpdate, ClientConnected, ClientDisconnected, GrabMessage, JoinMessage, MoveMessage, EditMessage, RemoveMessage, WebSocketMessage}
 
 import akka.actor.{Actor, ActorLogging, Props, actorRef2Scala}
 import akka.pattern.ask
@@ -48,6 +48,9 @@ class WebSocket(broadcastToAll: AnyRef => Unit) extends Actor with ActorLogging 
       board ! message
 
     case MoveMessage(message) =>
+      board ! message
+      
+    case EditMessage(message) =>
       board ! message
       
     case RemoveMessage(message) =>

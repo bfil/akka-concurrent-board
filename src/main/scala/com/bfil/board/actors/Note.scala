@@ -4,7 +4,7 @@ import scala.concurrent.duration.DurationInt
 import scala.util.Random
 
 import com.bfil.board.messages.Board.{NoteRemoved, Update}
-import com.bfil.board.messages.Note.{Drop, GetState, Grab, Grabbed, Move, NotGrabbed, NoteState, Remove}
+import com.bfil.board.messages.Note.{Drop, GetState, Grab, Grabbed, Move, Edit, NotGrabbed, NoteState, Remove}
 import com.bfil.board.messages.User.GetUsername
 
 import akka.actor.{Actor, ActorRef, Props, actorRef2Scala}
@@ -39,6 +39,14 @@ class Note(id: Int, _text: String) extends Actor {
         case Some(ownedBy) if ownedBy == sender =>
 	      x = _x
 	      y = _y
+	      context.parent ! Update
+        case _ =>
+      }
+      
+    case Edit(_text) =>
+      owner match {
+        case Some(ownedBy) if ownedBy == sender =>
+	      text = _text
 	      context.parent ! Update
         case _ =>
       }

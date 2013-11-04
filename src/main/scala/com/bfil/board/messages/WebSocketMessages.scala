@@ -4,7 +4,7 @@ import org.json4s.{jvalue2extractable, jvalue2monadic}
 import org.json4s.DefaultFormats
 import org.json4s.JsonAST.{JString, JValue}
 
-import com.bfil.board.messages.Board.{AddNote, GrabNote, Join, MoveNote, RemoveNote}
+import com.bfil.board.messages.Board.{AddNote, GrabNote, Join, MoveNote, EditNote, RemoveNote}
 import com.bfil.board.messages.Note.NoteState
 
 object WebSocket {
@@ -32,5 +32,6 @@ object WebSocket {
   case object AddNoteMessage extends Message[AddNote]
   case object GrabMessage extends Message[GrabNote]
   case object MoveMessage extends Message[MoveNote]
+  case object EditMessage extends Message[EditNote]
   case object RemoveMessage extends Message[RemoveNote]
 }

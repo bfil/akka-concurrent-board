@@ -92,6 +92,17 @@ class Board extends Actor with ActorLogging {
               boardUpdated()
             })
         })
+        
+    case BoardMessages.EditNote(username, noteId, text) =>
+      users.get(username).foreach(
+        user => {
+          notes.get(noteId).foreach(
+            note => {
+              notes = notes - noteId + (noteId -> note)
+              user ! UserMessages.EditNote(note, text)
+              boardUpdated()
+            })
+        })
             
     case BoardMessages.RemoveNote(username, noteId) =>
       users.get(username).foreach(

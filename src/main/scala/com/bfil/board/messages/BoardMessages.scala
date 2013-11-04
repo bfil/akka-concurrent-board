@@ -10,6 +10,7 @@ object Board {
   case class AddNote(username: String, text: String)
   case class GrabNote(username: String, noteId: Int)
   case class MoveNote(username: String, noteId: Int, x: Int, y: Int)
+  case class EditNote(username: String, noteId: Int, text: String)
   case class RemoveNote(username: String, noteId: Int)
   case class NoteRemoved(id: Int)
   
@@ -19,6 +20,7 @@ object Board {
 object User {
   case class GrabNote(note: ActorRef)
   case class MoveNote(note: ActorRef, x: Int, y: Int)
+  case class EditNote(note: ActorRef, text: String)
   case class RemoveNote(note: ActorRef)
   
   case object DropNote
@@ -27,6 +29,7 @@ object User {
 
 object Note {
   case class Move(x: Int, y: Int)
+  case class Edit(text: String)
   case class NoteState(id: Int, text: String, x: Int, y: Int, owner: Option[String])
   
   case object Grab

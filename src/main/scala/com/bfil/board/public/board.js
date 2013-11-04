@@ -56,7 +56,7 @@ $(function() {
 	function handleMessage(message, data) {
 		switch (message) {
             case "Grabbed":
-                $(lastClickedNote).find("span.user").text(username);
+            	$(lastClickedNote).find("span.user").text(username);
                 break;
             case "NotGrabbed":
                 board.trigger("drop");
@@ -122,7 +122,16 @@ $(function() {
                                 "z-index": i
                             }).addClass("note");
                             var noteContent = $('<div class="content"></div>');
-                            var text = $("<span></span>").addClass("text").text(noteState.text);
+                            var text = $("<span></span>").addClass("text").text(noteState.text).keydown(function(e) {
+                            	if(e.which === 13) {
+                            		e.preventDefault();
+                            		$(this).blur();
+                            		send("EditNote", {
+                                        noteId: $(this).parents(".note").data("id"),
+                                        text: $(this).text()
+                                    });
+                            	}
+                            });
                             var user = $("<span></span>").addClass("user").text(noteState.owner).addClass(users.find("#user-" + noteState.owner).attr("class"));
                             noteContent.append(text);
                             noteContent.append(user);
@@ -153,6 +162,8 @@ $(function() {
                                 });
                             });
                         }
+                        
+                        note.find("span.text").attr("contenteditable", noteState.owner === username);
                     })(note);
                 }
                 for(i=0; i<allNotes.length; i++) {

@@ -1,7 +1,7 @@
 package com.bfil.board.actors
 
-import com.bfil.board.messages.Note.{Drop, Grab, Grabbed, Move, NotGrabbed, Remove}
-import com.bfil.board.messages.User.{GetUsername, GrabNote, MoveNote, RemoveNote, DropNote}
+import com.bfil.board.messages.Note.{Drop, Grab, Grabbed, Move, Edit, NotGrabbed, Remove}
+import com.bfil.board.messages.User.{GetUsername, GrabNote, MoveNote, EditNote, RemoveNote, DropNote}
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props, actorRef2Scala}
 
@@ -28,6 +28,9 @@ class User(username: String) extends Actor with ActorLogging {
 
     case MoveNote(note, x, y) =>
       note ! Move(x, y)
+      
+    case EditNote(note, text) =>
+      note ! Edit(text)
 
     case RemoveNote(note) =>
       log.info(s"removing ${note.path.name}")
