@@ -57,6 +57,8 @@ class Note(id: Int, _text: String) extends Actor {
           o ? GetUsername map {
             case username: String => requester ! NoteState(id, text, x, y, Some(username))
             case _ => sender ! NoteState(id, text, x, y, None)
+          } recover {
+            case e: Throwable => sender ! NoteState(id, text, x, y, None)
           }
         case None =>
           sender ! NoteState(id, text, x, y, None)
