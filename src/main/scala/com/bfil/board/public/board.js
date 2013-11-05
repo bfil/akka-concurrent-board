@@ -110,7 +110,7 @@ $(function() {
                                 top : noteState.y,
                                 "z-index": i
                             });
-                            note.find("span.text").text(noteState.text);
+                            if(note.find("span.text").text() !== noteState.text) note.find("span.text").text(noteState.text);
                             note.find("span.user").text(noteState.owner || "").removeClass().addClass("user " + users.find("#user-" + noteState.owner).attr("class"));
                         } else {
                             note = $("<div></div>");

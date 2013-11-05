@@ -12,7 +12,7 @@ object Main extends App {
   implicit val system = ActorSystem("concurrent-board", ConfigFactory.load())
   
   val staticServer = system.actorOf(Props[StaticServer], name = "static-server")
-  IO(Http) ! Http.Bind(staticServer, interface = "localhost", port = 9000)
+  IO(Http) ! Http.Bind(staticServer, interface = "0.0.0.0", port = 9000)
   
   val server = system.actorOf(Props[Server], "server")
   server ! Start

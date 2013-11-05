@@ -33,6 +33,7 @@ class Note(id: Int, _text: String) extends Actor {
 
     case Drop =>
       owner.map(o => if (sender.equals(o)) owner = None)
+      context.parent ! Update
 
     case Move(_x, _y) =>
       owner match {
