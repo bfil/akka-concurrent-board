@@ -140,6 +140,7 @@ $(function() {
 
                             note.attr("draggable", true);
                             note.on("dragstart", function(e) {
+                            	$(this).find("span.text").blur();
                                 lastClickedNote = this;
                                 send("GrabNote", {
                                     noteId: $(this).data("id")

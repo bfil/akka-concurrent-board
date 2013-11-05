@@ -3,11 +3,11 @@ package com.bfil.board.actors
 import scala.concurrent.duration.DurationInt
 import scala.util.Random
 
-import com.bfil.board.messages.Board.{NoteRemoved, Update}
-import com.bfil.board.messages.Note.{Drop, GetState, Grab, Grabbed, Move, Edit, NotGrabbed, NoteState, Remove}
+import com.bfil.board.messages.Board.{ NoteRemoved, Update }
+import com.bfil.board.messages.Note.{ Drop, GetState, Grab, Grabbed, Move, Edit, NotGrabbed, NoteState, Remove }
 import com.bfil.board.messages.User.GetUsername
 
-import akka.actor.{Actor, ActorRef, Props, actorRef2Scala}
+import akka.actor.{ Actor, ActorRef, Props, actorRef2Scala }
 import akka.pattern.ask
 import akka.util.Timeout
 
@@ -21,6 +21,12 @@ class Note(id: Int, _text: String) extends Actor {
   var y = Random.nextInt(300)
   var owner: Option[ActorRef] = None
 
+  def ifOwner(actor: ActorRef)(f: => Unit) =
+    owner match {
+      case Some(ownedBy) if ownedBy == actor => f
+      case _ =>
+    }
+
   def receive = {
 
     case Grab =>
@@ -33,30 +39,23 @@ class Note(id: Int, _text: String) extends Actor {
 
     case Drop =>
       owner.map(o => if (sender.equals(o)) owner = None)
-      context.parent ! Update
 
     case Move(_x, _y) =>
-      owner match {
-        case Some(ownedBy) if ownedBy == sender =>
-	      x = _x
-	      y = _y
-	      context.parent ! Update
-        case _ =>
+      ifOwner(sender) {
+        x = _x
+        y = _y
+        context.parent ! Update
       }
-      
+
     case Edit(_text) =>
-      owner match {
-        case Some(ownedBy) if ownedBy == sender =>
-	      text = _text
-	      context.parent ! Update
-        case _ =>
+      ifOwner(sender) {
+        text = _text
+        context.parent ! Update
       }
-      
+
     case Remove =>
-      owner match {
-        case Some(ownedBy) if ownedBy == sender =>
-	      context.parent ! NoteRemoved(id)
-        case _ =>
+      ifOwner(sender) {
+        context.parent ! NoteRemoved(id)
       }
 
     case GetState =>
